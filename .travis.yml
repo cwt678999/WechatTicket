@@ -1,7 +1,5 @@
 language:python
 sudo:enabled
-services:
-    -mysql
 
 
 
