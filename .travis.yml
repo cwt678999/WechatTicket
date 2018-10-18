@@ -1,6 +1,6 @@
-language:python
-sudo:enabled
+language: python
+sudo: enabled
 services:
-    -mysql
+    - mysql
 python:
-    -"3.5"
+    - "3.5"
