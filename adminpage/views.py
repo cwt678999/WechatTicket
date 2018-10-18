@@ -19,8 +19,7 @@ class AdminLogin(APIView):
         if self.request.user.is_authenticated():
             return None
         else:
-            e = BaseError(3, '')
-            raise e
+            raise ValidateError('')
 
     def post(self):
         usn = self.body['username']
@@ -29,8 +28,7 @@ class AdminLogin(APIView):
         if user is not None and user.is_active:
             auth.login(self.request, user)
             return None
-        e = BaseError(3, '')
-        raise e
+        raise ValidateError('')
 
 class AdminLogout(APIView):
     def post(self):
@@ -80,8 +78,7 @@ class AdminActivityDelete(APIView):
             del_act.delete()
             return None
         else:
-            e = BaseError(2, '')
-            raise e
+            raise InputError('')
 
 class AdminActivityCreate(APIView):
     def post(self):
