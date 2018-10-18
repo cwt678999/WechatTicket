@@ -6,11 +6,11 @@ from codex.baseview import APIView
 
 from django.contrib import auth
 from django.contrib.auth import authenticate
-from django.http import HttpResponse
 from django.core import serializers
 
 from wechat.models import Activity
 from wechat.views import CustomWeChatView
+from codex.baseerror import BaseError
 
 import json, datetime, time, os
 
@@ -76,14 +76,13 @@ class Admin(APIView):
 
     def get(self):
         path = self.request.path[7:]
-        response = {'code': 0, 'msg': '', 'data': None}
 
         if path == "login":
             if self.request.user.is_authenticated():
                 return None
             else:
-                response['code'] = 3
-                raise response
+                e = BaseError(3, '')
+                raise e
 
         if path == "activity/list":
             activity_json = json.loads(serializers.serialize("json", Activity.objects.all()))
@@ -92,8 +91,8 @@ class Admin(APIView):
 
         if path == "activity/detail":
             if self.request.user.is_authenticated == False:
-                response['code'] = 3
-                raise response
+                e = BaseError(3, '')
+                raise e
             act_id = self.query['id']
             detail_queryset = Activity.objects.filter(id=act_id)
             detail_json = json.loads(serializers.serialize("json", detail_queryset))
@@ -116,10 +115,8 @@ class Admin(APIView):
                     res.append(tmp_dict)
             return res
 
-
     def post(self):
         path = self.request.path[7:]
-        response = {'code': 0, 'msg': '', 'data': None}
 
         if path == "login":
             usn = self.body['username']
@@ -128,8 +125,8 @@ class Admin(APIView):
             if user is not None and user.is_active:
                 auth.login(self.request, user)
                 return None
-            response['code'] = 3
-            raise response
+            e = BaseError(3, '')
+            raise e
 
         if path == "logout":
             auth.logout(self.request)
@@ -142,13 +139,10 @@ class Admin(APIView):
                 del_act.delete()
                 return None
             else:
-                response['code'] = 2
-                raise response
+                e = BaseError(2, '')
+                raise e
 
         if path == "activity/create":
-            if self.request.user.is_authenticated == False:
-                response['code'] = 3
-                raise response
             act_info = self.body
             new_act = Activity(name=act_info["name"], key=act_info["key"], place=act_info["place"],
                                description=act_info["description"], start_time=act_info["startTime"],
@@ -165,16 +159,12 @@ class Admin(APIView):
             del_id = self.body
             del_act = Activity.objects.get(id=del_id)
             if del_act is None:
-                response['code'] = 1
-                raise response
+                e = BaseError(1, '')
+                raise e
             del_act.delete()
             return None
 
-
         if path == "activity/detail":
-            if self.request.user.is_authenticated == False:
-                response['code'] = 3
-                raise response
             new_act_info = self.body
             act_id = new_act_info['id']
             act = Activity.objects.get(id=act_id)
@@ -200,16 +190,12 @@ class Admin(APIView):
             return None
 
         if path == "image/upload":
-            if self.request.user.is_authenticated == False:
-                response['code'] = 3
-                raise response
             img = self.input['image'][0]
             img_name = './media/img/%s' % (img.name)
             print(os.getcwd())
             with open(img_name, 'wb') as f:
                 for fimg in img.chunks():
                     f.write(fimg)
-            response['code'] = 0
             img_url = self.request.get_host() + self.request.path + img_name.strip('.')
             return img_url
 
