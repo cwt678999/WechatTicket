@@ -10,8 +10,9 @@ from django.http import HttpResponse
 from django.core import serializers
 
 from wechat.models import Activity
+from wechat.views import CustomWeChatView
 
-import json, datetime, time
+import json, datetime, time, os
 
 class Admin(APIView):
 
@@ -102,6 +103,18 @@ class Admin(APIView):
         if path == "activity/menu":
             res = []
             act = Activity.objects.all()
+            current_stamp = int(time.time())
+            count = 1
+            for line in act:
+                start_stamp = time.mktime(line.book_start.timetuple())
+                end_stamp = time.mktime(line.book_end.timetuple())
+                if start_stamp < current_stamp and current_stamp < end_stamp:
+                    tmp_dict = {}
+                    tmp_dict['id'] = line.id
+                    tmp_dict['name'] = line.name
+                    tmp_dict['menuIndex'] = 0
+                    res.append(tmp_dict)
+            return res
 
 
     def post(self):
@@ -143,6 +156,7 @@ class Admin(APIView):
                                book_end=act_info["bookEnd"], total_tickets=act_info["totalTickets"],
                                status=act_info["status"], pic_url=act_info["picUrl"],
                                remain_tickets=act_info["totalTickets"])
+
             new_act.save()
             id = new_act.id
             return id
@@ -176,16 +190,26 @@ class Admin(APIView):
                 act.save()
             return None
 
+        if path == "activity/menu":
+            list = self.body
+            act_list = []
+            for update_id in list:
+                act = Activity.objects.get(id=update_id)
+                act_list.append(act)
+            CustomWeChatView.update_menu(act_list)
+            return None
+
         if path == "image/upload":
             if self.request.user.is_authenticated == False:
                 response['code'] = 3
                 raise response
-            img = self.request.body['image']
-            img_name = '/media/img/%s' % (img.name)
+            img = self.input['image'][0]
+            img_name = './media/img/%s' % (img.name)
+            print(os.getcwd())
             with open(img_name, 'wb') as f:
                 for fimg in img.chunks():
                     f.write(fimg)
             response['code'] = 0
-            img_url = self.request.path.split("a/image/upload") + img_name
+            img_url = self.request.get_host() + self.request.path + img_name.strip('.')
             return img_url
 
