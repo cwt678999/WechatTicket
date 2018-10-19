@@ -1,15 +1,17 @@
-language:python
-sudo:enabled
+language: python
+sudo: enabled
 services:
-    -mysql
+    - mysql
 python:
-    -"3.5"
-
+    - "3.5"
+env:
+    global:
+    - TRAVIS=true
 before_install:
-    -mysql -e 'CREATE DATABASE IF NOT EXISTS wechat_ticket;'
+    - mysql -e 'CREATE DATABASE IF NOT EXISTS wechat_ticket;'
 # command to install dependencies
 install:
-    -pip install -r requirements.txt
-
+    - pip install -r requirements.txt
+    
 script:
-    python manage.py test
+- python manage.py test
