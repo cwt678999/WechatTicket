@@ -1,7 +1,11 @@
 from codex.baseerror import *
 from codex.baseview import APIView
 
+<<<<<<< HEAD
 from wechat.models import User
+=======
+from wechat.models import User, Ticket, Activity
+>>>>>>> Tai
 import time,datetime
 
 
@@ -16,12 +20,19 @@ class UserBind(APIView):
 
     def validate_user(self):
         user = User.get_by_openid(self.input['openid'])
+<<<<<<< HEAD
         sduId = user.student_id
         pswd = user.password
         if stuId == self.input['student_id'] and pswd == self.input['password'] :
             return
         else :
             raise NotImplementedError('You should implement UserBind.validate_user method')
+=======
+        stuId = self.input['student_id']
+        user.student_id = stuId
+        user.save()
+        return
+>>>>>>> Tai
 
     def get(self):
         self.check_input('openid')
