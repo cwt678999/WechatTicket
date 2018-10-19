@@ -1,7 +1,7 @@
 from codex.baseerror import *
 from codex.baseview import APIView
 
-from wechat.models import User
+from wechat.models import User, Ticket, Activity
 import time,datetime
 
 
@@ -16,7 +16,7 @@ class UserBind(APIView):
 
     def validate_user(self):
         user = User.get_by_openid(self.input['openid'])
-        sduId = user.student_id
+        stuId = user.student_id
         pswd = user.password
         if stuId == self.input['student_id'] and pswd == self.input['password'] :
             return
