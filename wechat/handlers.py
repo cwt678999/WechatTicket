@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 #
 from wechat.wrapper import WeChatHandler
-
-
+from wechat.models import Activity,Ticket,User
+from WeChatTicket import settings
 __author__ = "Epsirom"
 
 
@@ -65,3 +65,45 @@ class BookEmptyHandler(WeChatHandler):
 
     def handle(self):
         return self.reply_text(self.get_message('book_empty'))
+
+class BookWhatHandler(WechatHandler):
+    def check(self):
+        return self.is_text('抢啥') or self.is_event_click(self.view.event_keys['book_what'])
+
+    def handle(self):
+        details = []
+        activities = Activity.objects.filter(status=Activity.STATUS_PUBLISHED)
+        if activities:
+            for item in activities:
+                details.append({
+                    'Title':item.name,
+                    'Description':item.description,
+                    'PicUrl':item.pic_url,
+                    'Url':settings.get_url("/u/activity",{"id":item.id})
+                })
+
+            return self.reply_news(details)
+
+        else :
+            return self.reply_text("无可抢票的活动")
+
+class FindOutTicketHandler(WeChatHandler):
+    def check(self):
+        return self.is_text('查票') or self.is_event_click(self.view.event_keys['get_ticket'])
+
+    def handle(self):
+        details = []
+        user = User.get_by_openid(self.input['openid'])
+        tickets = Ticket.objects.filter(student_id=user.student_id,status=Ticket.STATUS_VALID)
+        if not tickets:
+            return self.reply_text("没有票可用")
+        else :
+            for item in tickets:
+                activity = item.activity
+                details.append({
+                    'Title': activity.name,
+                    'Description': activity.description,
+                    'PicUrl': activity.pic_url,
+                    'Url': settings.get_url("/u/ticket", {'openid':user.open_id,'ticket':item.unique_id})
+                })
+            return self.reply_news(details)
