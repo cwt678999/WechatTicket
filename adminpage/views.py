@@ -87,7 +87,6 @@ class AdminActivityCreate(APIView):
         time_stamp += 8 * 60 * 60
         time_tuple = time.localtime(time_stamp)
         date_time = time.strftime('%Y-%m-%dT%H:%M:%SZ', time_tuple)
-        print(date_time)
         return date_time
 
     def post(self):

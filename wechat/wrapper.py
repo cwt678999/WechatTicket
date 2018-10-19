@@ -77,6 +77,11 @@ class WeChatHandler(object):
     def is_event_click(self, *event_keys):
         return self.is_msg_type('event') and (self.input['Event'] == 'CLICK') and (self.input['EventKey'] in event_keys)
 
+    def is_book_event_click(self, *event_keys):
+        input_event = self.input['EventKey'].split('_')
+        event_type = input_event[0] + '_' + input_event[1] + '_'
+        return self.is_msg_type('event') and (self.input['Event'] == 'CLICK') and (event_type in event_keys)
+
     def is_event(self, *events):
         return self.is_msg_type('event') and (self.input['Event'] in events)
 
