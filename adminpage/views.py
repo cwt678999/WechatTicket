@@ -8,7 +8,7 @@ from django.contrib import auth
 from django.contrib.auth import authenticate
 from django.core import serializers
 
-from wechat.models import Activity
+from wechat.models import Activity, Ticket
 from wechat.views import CustomWeChatView
 from codex.baseerror import BaseError
 
@@ -118,7 +118,6 @@ class AdminActivityDetail(APIView):
         time_stamp += 8 * 60 * 60
         time_tuple = time.localtime(time_stamp)
         date_time = time.strftime('%Y-%m-%dT%H:%M:%SZ', time_tuple)
-        print(date_time)
         return date_time
 
     def stringToTimeStamp(self, date_str):
@@ -152,7 +151,7 @@ class AdminActivityDetail(APIView):
         return tmp_dict
 
     def get(self):
-        act_id = self.query['id']
+        act_id = self.input['id']
         detail_queryset = Activity.objects.filter(id=act_id)
         detail_json = json.loads(serializers.serialize("json", detail_queryset))
         detail = self.formatActivityDetail(detail_json)
@@ -200,5 +199,34 @@ class AdminActivityMenu(APIView):
         return None
 
 class AdminActivityCheckin(APIView):
+
+    def datetimeToStamp(self, date_time):
+        return int(time.mktime(date_time.timetuple()))
+
     def post(self):
-        return None
+        self.check_input('actId')
+        # 活动是否存在
+        try:
+            act = Activity.objects.get(id=int(self.input['actId']))
+        except:
+            raise LogicError('activity not found')
+        else:
+            act_start = self.datetimeToStamp(act.start_time)
+            act_end = self.datetimeToStamp(act.end_time)
+            current = int(time.time())
+            if current < act_start or current > act_end:
+                raise LogicError('not activity time')
+        # 输入是否合法
+        try:
+            if 'ticket' in self.input:
+                ticket = Ticket.objects.get(unique_id=self.input['ticket'])
+            elif 'studentId' in self.input:
+                ticket = Ticket.objects.get(student_id=self.input['studentId'])
+        except:
+            raise LogicError('ticket not found')
+        else:
+            if ticket.status != Ticket.STATUS_VALID:
+                raise LogicError('invalid ticket')
+            ticket.status = Ticket.STATUS_USED
+            ticket.save()
+            return {'ticket': ticket.unique_id, 'studentId': ticket.student_id}
