@@ -17,9 +17,11 @@ class UserBind(APIView):
     def validate_user(self):
         user = User.get_by_openid(self.input['openid'])
         stuId = self.input['student_id']
-        user.student_id = stuId
-        user.save()
-        return
+        if user:
+            raise ValidateError("Can't validate again")
+        if User.objects.filter(student=self.input['student_id']):
+            raise ValidateError("Existed student_id")
+
 
     def get(self):
         self.check_input('openid')
@@ -52,10 +54,7 @@ class ActivityDetail(APIView):
             ActivityDict['remainTickets']=activity.remain_tickets
             ActivityDict['currentTime']=int(time.time())
             return ActivityDict
-        else:
-            raise LogicError(self.input)
-
-
+        else : raise InputError("error")
 class TicketDetail(APIView):
 
     def get(self):
