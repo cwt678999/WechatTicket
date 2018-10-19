@@ -78,6 +78,13 @@ class BookHandler(WeChatHandler):
     def datetimeToStamp(self, date_time):
         return int(time.mktime(date_time.timetuple()))
 
+    def sub8Hours(self, date_time):
+        time_stamp = int(time.mktime(date_time.timetuple()))
+        time_stamp -= 8 * 60 * 60
+        time_tuple = time.localtime(time_stamp)
+        dtime = time.strftime('%Y-%m-%d %H:%M:%S', time_tuple)
+        return dtime
+
     def check(self):
         return self.is_book_event_click(self.view.event_keys['book_header'])
 
@@ -90,28 +97,39 @@ class BookHandler(WeChatHandler):
         bookstart = self.datetimeToStamp(act.book_start)
         bookend = self.datetimeToStamp(act.book_end)
         current = int(time.time())
-        try:
-            if current < bookstart or current > bookend:
-                raise Exception('not booking time')
-        except:
-            return self.reply_text(self.get_message('book_fail_time', activity_name=act.name,
-                                                    book_start=act.book_start, book_end=act.book_end))
-        try:
-            remain = act.remain_tickets
-            if remain <= 0:
-                raise Exception('no more tickets left')
-        except:
-            return self.reply_text(self.get_message('book_fail_no_remain', activity_name=act.name))
+        # 判断有无票
         try:
             Ticket.objects.get(student_id=studentid, activity_id=act_id)
         except:
-            uniqueid = self.createUniqueId()
-            print(uniqueid)
-            sta = Ticket.STATUS_VALID
-            ticket = Ticket(student_id=studentid, unique_id=uniqueid, activity_id=act_id, status=sta)
-            ticket.save()
-            act.remain_tickets -= 1
-            act.save()
-            return self.reply_text(self.get_message('book_success', activity_name=act.name, unique_id=uniqueid))
+            # 判断活动时间
+            try:
+                if current < bookstart or current > bookend:
+                    raise Exception('not booking time')
+            except:
+                return self.reply_text(self.get_message('book_fail_time', activity_name=act.name,
+                                                        book_start=self.sub8Hours(act.book_start)
+                                                        , book_end=self.sub8Hours(act.book_end)))
+            try:
+                remain = act.remain_tickets
+                if remain <= 0:
+                    raise Exception('no more tickets left')
+            except:
+                return self.reply_text(self.get_message('book_fail_no_remain', activity_name=act.name))
+            # 创建票
+            else:
+                uniqueid = self.createUniqueId()
+                print(uniqueid)
+                sta = Ticket.STATUS_VALID
+                ticket = Ticket(student_id=studentid, unique_id=uniqueid, activity_id=act_id, status=sta)
+                ticket.save()
+                act.remain_tickets -= 1
+                act.save()
+                return self.reply_text(self.get_message('book_success', activity_name=act.name, unique_id=uniqueid))
         else:
-            return self.reply_text(self.get_message('book_fail_exist', activity_name=act.name))
+            ticket = Ticket.objects.get(student_id=studentid, activity_id=act_id)
+            # 票取消过
+            if ticket.status == Ticket.STATUS_VALID:
+                return self.reply_text(self.get_message('book_fail_exist', activity_name=act.name))
+            elif ticket.status == Ticket.STATUS_CANCELLED:
+                ticket.status = Ticket.STATUS_VALID
+                return self.reply_text(self.get_message('book_success', activity_name=act.name, unique_id=uniqueid))
