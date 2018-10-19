@@ -15,12 +15,6 @@ def timeStamp(date_str):
 class UserBind(APIView):
 
     def validate_user(self):
-        """
-        input: self.input['student_id'] and self.input['password']
-        raise: ValidateError when validating failed
-        """
-
-    def validate_user(self):
         user = User.get_by_openid(self.input['openid'])
         sduId = user.student_id
         pswd = user.password
@@ -39,6 +33,7 @@ class UserBind(APIView):
         self.validate_user()
         user.student_id = self.input['student_id']
         user.save()
+        
 class ActivityDetail(APIView):
 
     def get(self):
