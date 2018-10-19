@@ -81,15 +81,23 @@ class AdminActivityDelete(APIView):
             raise InputError('')
 
 class AdminActivityCreate(APIView):
+    def add8Hours(self, timestr):
+        date_time = time.strptime(timestr,"%Y-%m-%dT%H:%M:%S.%fZ")
+        time_stamp = int(time.mktime(date_time))
+        time_stamp += 8 * 60 * 60
+        time_tuple = time.localtime(time_stamp)
+        date_time = time.strftime('%Y-%m-%dT%H:%M:%SZ', time_tuple)
+        print(date_time)
+        return date_time
+
     def post(self):
         act_info = self.body
         new_act = Activity(name=act_info["name"], key=act_info["key"], place=act_info["place"],
-                           description=act_info["description"], start_time=act_info["startTime"],
-                           end_time=act_info["endTime"], book_start=act_info["bookStart"],
-                           book_end=act_info["bookEnd"], total_tickets=act_info["totalTickets"],
+                           description=act_info["description"], start_time=self.add8Hours(act_info["startTime"]),
+                           end_time=self.add8Hours(act_info["endTime"]), book_start=self.add8Hours(act_info["bookStart"]),
+                           book_end=self.add8Hours(act_info["bookEnd"]), total_tickets=act_info["totalTickets"],
                            status=act_info["status"], pic_url=act_info["picUrl"],
                            remain_tickets=act_info["totalTickets"])
-
         new_act.save()
         id = new_act.id
         return id
@@ -98,7 +106,6 @@ class AdminImageUpload(APIView):
     def post(self):
         img = self.input['image'][0]
         img_name = './media/img/%s' % (img.name)
-        print(os.getcwd())
         with open(img_name, 'wb') as f:
             for fimg in img.chunks():
                 f.write(fimg)
@@ -106,6 +113,15 @@ class AdminImageUpload(APIView):
         return img_url
 
 class AdminActivityDetail(APIView):
+    def add8Hours(self, timestr):
+        date_time = time.strptime(timestr,"%Y-%m-%dT%H:%M:%S.%fZ")
+        time_stamp = int(time.mktime(date_time))
+        time_stamp += 8 * 60 * 60
+        time_tuple = time.localtime(time_stamp)
+        date_time = time.strftime('%Y-%m-%dT%H:%M:%SZ', time_tuple)
+        print(date_time)
+        return date_time
+
     def stringToTimeStamp(self, date_str):
         d = datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
         t = d.timetuple()
@@ -150,10 +166,10 @@ class AdminActivityDetail(APIView):
         if act:
             act.description = new_act_info['description']
             act.pic_url = new_act_info['picUrl']
-            act.start_time = new_act_info['startTime']
-            act.end_time = new_act_info['endTime']
-            act.book_start = new_act_info['bookStart']
-            act.book_end = new_act_info['bookEnd']
+            act.start_time = self.add8Hours(new_act_info['startTime'])
+            act.end_time = self.add8Hours(new_act_info['endTime'])
+            act.book_start = self.add8Hours(new_act_info['bookStart'])
+            act.book_end = self.add8Hours(new_act_info['bookEnd'])
             act.total_tickets = new_act_info['totalTickets']
             act.status = new_act_info['status']
             act.save()
@@ -164,7 +180,6 @@ class AdminActivityMenu(APIView):
         res = []
         act = Activity.objects.all()
         current_stamp = int(time.time())
-        count = 1
         for line in act:
             start_stamp = time.mktime(line.book_start.timetuple())
             end_stamp = time.mktime(line.book_end.timetuple())
