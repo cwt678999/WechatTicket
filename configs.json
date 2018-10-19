@@ -3,12 +3,12 @@
   "DEBUG": true,
   "IGNORE_WECHAT_SIGNATURE": false,
   "WECHAT_TOKEN": "ThisIsAWeChatTokenWhichCanBeARandomString",
-  "WECHAT_APPID": "PleaseCopyFromWebsite",
-  "WECHAT_SECRET": "PleaseCopyFromWebsite",
+  "WECHAT_APPID": "wx147dc95c9085c283",
+  "WECHAT_SECRET": "be3de7d16481965e0b0144299f213b91",
   "DB_NAME": "wechat_ticket",
   "DB_USER": "root",
-  "DB_PASS": "",
+  "DB_PASS": "123456",
   "DB_HOST": "127.0.0.1",
   "DB_PORT": "3306",
-  "SITE_DOMAIN": "http://your.domain"
+  "SITE_DOMAIN": "http://f223h94865.51mypc.cn"
 }
