@@ -98,9 +98,11 @@ class BookHandler(WeChatHandler):
         act = Activity.objects.get(id=act_id)
         openid = self.input['FromUserName']
         studentid = User.objects.get(open_id=openid).student_id
+        if studentid =='':
+            return self.reply_text(self.get_message('book_fail_validate', activity_name=act.name))
         bookstart = self.datetimeToStamp(act.book_start)
         bookend = self.datetimeToStamp(act.book_end)
-        current = int(time.time())
+        current = int(time.mktime(timezone.now().timetuple()))
         # 判断有无票
         try:
             Ticket.objects.get(student_id=studentid, activity_id=act_id)
