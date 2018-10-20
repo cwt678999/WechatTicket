@@ -174,11 +174,11 @@ class FindOutTicketHandler(WeChatHandler):
             return self.reply_text("没有票可用")
         else :
             for item in tickets:
-                activity = Activity.objects.filter(key=self.input['Content'][3:],status=Activity.STATUS_PUBLISHED)
+                activity = Activity.objects.get(id=item.activity_id,status=Activity.STATUS_PUBLISHED)
                 details.append({
                     'Title': activity.name,
                     'Description': activity.description,
                     'PicUrl': activity.pic_url,
-                    'Url': settings.get_url("/u/ticket", {'openid':user.open_id,'ticket':item.unique_id})
+                    'Url': settings.get_url("/u/ticket", {'openid':self.user.open_id,'ticket':item.unique_id})
                 })
             return self.reply_news(details)
