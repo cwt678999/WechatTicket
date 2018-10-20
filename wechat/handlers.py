@@ -82,20 +82,27 @@ class BookHandler(WeChatHandler):
     def datetimeToStamp(self, date_time):
         return int(time.mktime(date_time.timetuple()))
 
-    def sub8Hours(self, date_time):
-        time_stamp = int(time.mktime(date_time.timetuple()))
-        time_stamp -= 8 * 60 * 60
-        time_tuple = time.localtime(time_stamp)
-        dtime = time.strftime('%Y-%m-%d %H:%M:%S', time_tuple)
-        return dtime
-
     def check(self):
-        return self.is_book_event_click(self.view.event_keys['book_header'])
+        return self.is_text_command('抢票') or self.is_book_event_click(self.view.event_keys['book_header'])
 
     def handle(self):
-        input_event = self.input['EventKey'].split('_')
-        act_id = int(input_event[2])
-        act = Activity.objects.get(id=act_id)
+        try:
+            input_event = self.input['EventKey'].split('_')
+        except:
+            content = self.input['Content'].split()[1]
+            try:
+                act = Activity.objects.get(name=content)
+            except:
+                try:
+                    act = Activity.objects.get(key=content)
+                except:
+                    return self.reply_text(self.get_message('book_fail_command'))
+        else:
+            act_id = int(input_event[2])
+            try:
+                act = Activity.objects.get(id=act_id)
+            except:
+                return self.reply_text(self.get_message('book_fail_command'))
         openid = self.input['FromUserName']
         studentid = User.objects.get(open_id=openid).student_id
         if studentid =='':
@@ -105,7 +112,7 @@ class BookHandler(WeChatHandler):
         current = int(time.mktime(timezone.now().timetuple()))
         # 判断有无票
         try:
-            Ticket.objects.get(student_id=studentid, activity_id=act_id)
+            Ticket.objects.get(student_id=studentid, activity_id=act.id)
         except:
             # 判断活动时间
             try:
@@ -126,19 +133,19 @@ class BookHandler(WeChatHandler):
                 uniqueid = self.createUniqueId()
                 print(uniqueid)
                 sta = Ticket.STATUS_VALID
-                ticket = Ticket(student_id=studentid, unique_id=uniqueid, activity_id=act_id, status=sta)
+                ticket = Ticket(student_id=studentid, unique_id=uniqueid, activity_id=act.id, status=sta)
                 ticket.save()
                 act.remain_tickets -= 1
                 act.save()
                 return self.reply_text(self.get_message('book_success', activity_name=act.name, unique_id=uniqueid))
         else:
-            ticket = Ticket.objects.get(student_id=studentid, activity_id=act_id)
+            ticket = Ticket.objects.get(student_id=studentid, activity_id=act.id)
             # 票取消过
             if ticket.status == Ticket.STATUS_VALID:
                 return self.reply_text(self.get_message('book_fail_exist', activity_name=act.name))
             elif ticket.status == Ticket.STATUS_CANCELLED:
                 ticket.status = Ticket.STATUS_VALID
-                return self.reply_text(self.get_message('book_success', activity_name=act.name, unique_id=uniqueid))
+                return self.reply_text(self.get_message('book_success', activity_name=act.name, unique_id=ticket.unique_id))
 
 class BookWhatHandler(WeChatHandler):
     def check(self):

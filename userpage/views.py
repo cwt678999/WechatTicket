@@ -56,9 +56,10 @@ class ActivityDetail(APIView):
             ActivityDict['totalTickets']=activity.total_tickets
             ActivityDict['picUrl']=activity.pic_url
             ActivityDict['remainTickets']=activity.remain_tickets
-            ActivityDict['currentTime']=int(time.mktime(timezone.now().timetuple()))
+            ActivityDict['currentTime']=int(time.mktime(timezone.now().timetuple())) + 8*60*60
             return ActivityDict
         else : raise InputError("error")
+
 class TicketDetail(APIView):
 
     def get(self):
@@ -71,7 +72,7 @@ class TicketDetail(APIView):
         TicketDict['uniqueId'] = ticket.unique_id
         TicketDict['startTime'] = timeStamp(ticket.activity.start_time) + 8*60*60
         TicketDict['endTime'] = timeStamp(ticket.activity.end_time) + 8*60*60
-        TicketDict['currentTime'] = int(time.mktime(timezone.now().timetuple()))
+        TicketDict['currentTime'] = int(time.mktime(timezone.now().timetuple())) + 8*60*60
         TicketDict['status'] = ticket.status
         return TicketDict
 

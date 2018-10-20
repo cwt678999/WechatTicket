@@ -92,11 +92,11 @@ class AdminImageUpload(APIView):
     def post(self):
         self.check_input('image')
         img = self.input['image'][0]
-        img_name = './media/img/%s' % (str(uuid.uuid1()) + '-' + img.name)
+        img_name = './static/media/img/%s' % (str(uuid.uuid1()) + '-' + img.name)
         with open(img_name, 'wb') as f:
             for fimg in img.chunks():
                 f.write(fimg)
-        img_url = self.request.get_host() + self.request.path + img_name.strip('.')
+        img_url = 'http://' + self.request.get_host() + '/' + img_name.strip('./static')
         return img_url
 
 class AdminActivityDetail(APIView):
@@ -210,9 +210,9 @@ class AdminActivityCheckin(APIView):
         # 输入是否合法
         try:
             if 'ticket' in self.input:
-                ticket = Ticket.objects.get(unique_id=self.input['ticket'])
+                ticket = Ticket.objects.get(unique_id=int(self.input['ticket']), activity_id=int(self.input['actId']))
             elif 'studentId' in self.input:
-                ticket = Ticket.objects.get(student_id=self.input['studentId'])
+                ticket = Ticket.objects.get(student_id=int(self.input['studentId']), activity_id=int(self.input['actId']))
             else:
                 raise InputError('input error')
         except:
