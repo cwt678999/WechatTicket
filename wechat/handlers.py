@@ -66,7 +66,7 @@ class BookEmptyHandler(WeChatHandler):
     def handle(self):
         return self.reply_text(self.get_message('book_empty'))
 
-class BookWhatHandler(WechatHandler):
+class BookWhatHandler(WeChatHandler):
     def check(self):
         return self.is_text('抢啥') or self.is_event_click(self.view.event_keys['book_what'])
 
