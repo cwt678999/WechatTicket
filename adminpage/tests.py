@@ -22,7 +22,7 @@ class LoginTest(TestCase):
         c=Client()
         res = c.post('/api/a/login',user)
         code = res.json()['code']
-        self.assertNotEqual(code,0)
+        self.assertEqual(code,0)
 
         res = c.post('/api/a/login',{
                                         "username":"admin",
@@ -45,7 +45,7 @@ class LogoutTest(TestCase):
         c= Client()
         res = c.post('/api/a/logout',content_type="application/json")
         code = res.json()['code']
-        self.assertNotEqual(code,0)
+        self.assertEqual(code,0)
 
     def testRightLogout(self):
         c= Client()
@@ -80,7 +80,7 @@ class ActivityTest(TestCase):
                           }
         res = c.post('/api/a/activity/create',activity)
         code = res.json()['code']
-        self.assertEqual(code,0)
+        self.assertNotEqual(code,0)
 
     def testDeleteActivity(self):
         c = Client()
@@ -105,7 +105,7 @@ class ActivityTest(TestCase):
         res = c.post('/api/a/activity/create',activity)
         res = c.post('/api/a/activity/delete',{'name':'22'})
         code = res.json()['code']
-        self.assertEqual(code,0)
+        self.assertNotEqual(code,0)
         res = c.post('/api/a/activity/delete',{'name':'212'})
         code = res.json()['code']
         self.assertNotEqual(code,0)
