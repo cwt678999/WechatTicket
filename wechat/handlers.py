@@ -100,7 +100,7 @@ class FindOutTicketHandler(WeChatHandler):
             return self.reply_text("没有票可用")
         else :
             for item in tickets:
-                activity = item.activity
+                activity = Activity.objects.filter(key=self.input['Content'][3:],status=Activity.STATUS_PUBLISHED)
                 details.append({
                     'Title': activity.name,
                     'Description': activity.description,
