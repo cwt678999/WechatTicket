@@ -164,7 +164,7 @@ class FindOutTicketHandler(WeChatHandler):
     def handle(self):
         details = []
         user = User.get_by_openid(self.input['openid'])
-        tickets = Ticket.objects.filter(student_id=user.student_id,status=Ticket.STATUS_VALID)
+        tickets = Ticket.objects.filter(stdent_id=user.student_id,status=Ticket.STATUS_VALID)
         if not tickets:
             return self.reply_text("没有票可用")
         else :

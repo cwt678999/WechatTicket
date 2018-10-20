@@ -5,11 +5,11 @@ from wechat.models import User, Ticket, Activity
 import time,datetime
 
 
-def timeStamp(date_str):
-    d = datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
-    t = d.timetuple()
+def timeStamp(date):
+    #d = datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+    t = date.timetuple()
     timestamp = int(time.mktime(t))
-    timestamp = float(str(timestamp) + str("%06d" % d.microsecond)) / 1000000
+    timestamp = float(str(timestamp) + str("%06d" % date.microsecond)) / 1000000
     return int(timestamp)
 
 class UserBind(APIView):
@@ -17,9 +17,12 @@ class UserBind(APIView):
     def validate_user(self):
         user = User.get_by_openid(self.input['openid'])
         stuId = self.input['student_id']
-        if user:
-            raise ValidateError("Can't validate again")
-        if User.objects.filter(student=self.input['student_id']):
+        try:
+            User.objects.get(student_id=self.input['student_id'])
+        except:
+            user.student_id = stuId
+            user.save()
+        else:
             raise ValidateError("Existed student_id")
 
 

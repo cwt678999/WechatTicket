@@ -21,6 +21,7 @@ class Command(BaseCommand):
         CustomWeChatView.update_menu(Activity.objects.filter(
             status=Activity.STATUS_PUBLISHED, book_end__gt=timezone.now()
         ).order_by('book_end'))
+        print(timezone.now())
         act_btns = CustomWeChatView.get_book_btn().get('sub_button', list())
         self.logger.info('Updated %d activities', len(act_btns))
         self.logger.info('=' * 32)
