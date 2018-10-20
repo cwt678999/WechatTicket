@@ -28,6 +28,7 @@ class Activity(models.Model):
     status = models.IntegerField()
     pic_url = models.CharField(max_length=256)
     remain_tickets = models.IntegerField()
+    used_tickets = models.IntegerField()
 
     STATUS_DELETED = -1
     STATUS_SAVED = 0
