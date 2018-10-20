@@ -64,12 +64,13 @@ class AdminActivityDelete(APIView):
     def post(self):
         self.check_input('id')
         del_id = self.input["id"]
-        del_act = Activity.objects.get(id=del_id)
-        if del_act is not None:
+        try:
+            del_act = Activity.objects.get(id=del_id)
+        except:
+            raise LogicError('activity not found')
+        else:
             del_act.delete()
             return None
-        else:
-            raise InputError('')
 
 class AdminActivityCreate(APIView):
 
@@ -170,7 +171,7 @@ class AdminActivityMenu(APIView):
         for line in act:
             start_stamp = time.mktime(line.book_start.timetuple())
             end_stamp = time.mktime(line.book_end.timetuple())
-            if start_stamp < current_stamp and current_stamp < end_stamp:
+            if current_stamp < end_stamp:
                 tmp_dict = {}
                 tmp_dict['id'] = line.id
                 tmp_dict['name'] = line.name
