@@ -85,7 +85,7 @@ class BookWhatHandler(WeChatHandler):
             return self.reply_news(details)
 
         else :
-            return self.reply_text("无可抢票的活动")
+            return self.reply_text(self.get_message('bind_account'))
 
 class FindOutTicketHandler(WeChatHandler):
     def check(self):
