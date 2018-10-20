@@ -167,13 +167,14 @@ class FindOutTicketHandler(WeChatHandler):
 
     def handle(self):
         details = []
-        user = User.get_by_openid(self.input['openid'])
-        tickets = Ticket.objects.filter(stdent_id=user.student_id,status=Ticket.STATUS_VALID)
+        if not self.user.student_id:
+            return self.reply_text("您还未绑定")
+        tickets = Ticket.objects.filter(student_id=self.user.student_id,status=Ticket.STATUS_VALID)
         if not tickets:
             return self.reply_text("没有票可用")
         else :
             for item in tickets:
-                activity = item.activity
+                activity = Activity.objects.filter(key=self.input['Content'][3:],status=Activity.STATUS_PUBLISHED)
                 details.append({
                     'Title': activity.name,
                     'Description': activity.description,
