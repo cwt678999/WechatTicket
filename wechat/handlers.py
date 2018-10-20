@@ -7,6 +7,8 @@ import uuid, random, time
 from wechat.models import Activity,Ticket,User
 from WeChatTicket import settings
 
+from django.utils import timezone
+
 
 __author__ = "Epsirom"
 
@@ -109,8 +111,8 @@ class BookHandler(WeChatHandler):
                     raise Exception('not booking time')
             except:
                 return self.reply_text(self.get_message('book_fail_time', activity_name=act.name,
-                                                        book_start=self.sub8Hours(act.book_start)
-                                                        , book_end=self.sub8Hours(act.book_end)))
+                                                        book_start=act.book_start
+                                                        , book_end=act.book_end))
             try:
                 remain = act.remain_tickets
                 if remain <= 0:

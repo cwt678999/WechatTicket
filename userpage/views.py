@@ -2,6 +2,7 @@ from codex.baseerror import *
 from codex.baseview import APIView
 
 from wechat.models import User, Ticket, Activity
+from django.utils import timezone
 import time,datetime
 
 
@@ -47,15 +48,15 @@ class ActivityDetail(APIView):
             ActivityDict['name']=activity.name
             ActivityDict['key']=activity.key
             ActivityDict['description']=activity.description
-            ActivityDict['startTime']=timeStamp(activity.start_time)
-            ActivityDict['endTime']=timeStamp(activity.end_time)
+            ActivityDict['startTime']=timeStamp(activity.start_time) + 8*60*60
+            ActivityDict['endTime']=timeStamp(activity.end_time) + 8*60*60
             ActivityDict['place']=activity.place
-            ActivityDict['bookStart']=timeStamp(activity.book_start)
-            ActivityDict['bookEnd']=timeStamp(activity.book_end)
+            ActivityDict['bookStart']=timeStamp(activity.book_start) + 8*60*60
+            ActivityDict['bookEnd']=timeStamp(activity.book_end) + 8*60*60
             ActivityDict['totalTickets']=activity.total_tickets
             ActivityDict['picUrl']=activity.pic_url
             ActivityDict['remainTickets']=activity.remain_tickets
-            ActivityDict['currentTime']=int(time.time())
+            ActivityDict['currentTime']=int(time.mktime(timezone.now().timetuple()))
             return ActivityDict
         else : raise InputError("error")
 class TicketDetail(APIView):
@@ -68,9 +69,9 @@ class TicketDetail(APIView):
         TicketDict['place']=ticket.activity.place
         TicketDict['activityKey'] = ticket.activity.key
         TicketDict['uniqueId'] = ticket.unique_id
-        TicketDict['startTime'] = timeStamp(ticket.activity.start_time)
-        TicketDict['endTime'] = timeStamp(ticket.activity.end_time)
-        TicketDict['currentTime'] = int(time.time())
+        TicketDict['startTime'] = timeStamp(ticket.activity.start_time) + 8*60*60
+        TicketDict['endTime'] = timeStamp(ticket.activity.end_time) + 8*60*60
+        TicketDict['currentTime'] = int(time.mktime(timezone.now().timetuple()))
         TicketDict['status'] = ticket.status
         return TicketDict
 
